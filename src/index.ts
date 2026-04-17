@@ -35,6 +35,7 @@ const OKTA_AUTHORIZE_URL = `${OKTA_ISSUER}/v1/authorize`;
 const OKTA_TOKEN_URL = `${OKTA_ISSUER}/v1/token`;
 const OKTA_USERINFO_URL = `${OKTA_ISSUER}/v1/userinfo`;
 const OKTA_SCOPES = "openid profile email";
+const OKTA_BASIC_AUTH = Buffer.from(`${OKTA_CLIENT_ID}:${OKTA_CLIENT_SECRET}`).toString("base64");
 
 // --- In-memory stores ---
 
@@ -156,8 +157,6 @@ class OktaOAuthProvider implements OAuthServerProvider {
     refreshToken: string
   ): Promise<OAuthTokens> {
     const body = new URLSearchParams({
-      client_id: OKTA_CLIENT_ID,
-      client_secret: OKTA_CLIENT_SECRET,
       grant_type: "refresh_token",
       refresh_token: refreshToken,
       scope: OKTA_SCOPES,
@@ -165,7 +164,10 @@ class OktaOAuthProvider implements OAuthServerProvider {
 
     const response = await fetch(OKTA_TOKEN_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Basic ${OKTA_BASIC_AUTH}`,
+      },
       body: body.toString(),
     });
 
@@ -373,8 +375,6 @@ async function main() {
 
     try {
       const tokenBody = new URLSearchParams({
-        client_id: OKTA_CLIENT_ID,
-        client_secret: OKTA_CLIENT_SECRET,
         code: code as string,
         redirect_uri: `${SERVER_URL}/okta/callback`,
         grant_type: "authorization_code",
@@ -383,7 +383,10 @@ async function main() {
 
       const tokenResponse = await fetch(OKTA_TOKEN_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Basic ${OKTA_BASIC_AUTH}`,
+        },
         body: tokenBody.toString(),
       });
 
