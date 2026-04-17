@@ -348,6 +348,28 @@ async function main() {
 
   const provider = new OktaOAuthProvider();
 
+  // Auto-register unknown clients on /authorize to survive redeploys
+  // (in-memory store is wiped on each deploy, but clients cache their client_id)
+  app.get("/authorize", async (req: Request, _res: Response, next: NextFunction) => {
+    const clientId = req.query.client_id as string;
+    const redirectUri = req.query.redirect_uri as string;
+    if (clientId && redirectUri) {
+      const existing = await provider.clientsStore.getClient(clientId);
+      if (!existing) {
+        console.log(`Auto-registering unknown client ${clientId}`);
+        await provider.clientsStore.registerClient({
+          client_id: clientId,
+          client_id_issued_at: Math.floor(Date.now() / 1000),
+          redirect_uris: [redirectUri],
+          grant_types: ["authorization_code", "refresh_token"],
+          response_types: ["code"],
+          token_endpoint_auth_method: "none",
+        } as OAuthClientInformationFull);
+      }
+    }
+    next();
+  });
+
   // Mount OAuth routes (handles /authorize, /token, /register, /.well-known/*)
   app.use(
     mcpAuthRouter({
