@@ -30,10 +30,10 @@ const OKTA_CLIENT_SECRET = process.env.OKTA_CLIENT_SECRET!;
 const SERVER_URL = process.env.SERVER_URL || "http://localhost:3333";
 const PORT = parseInt(process.env.PORT || "3333", 10);
 
-const OKTA_ISSUER = `https://${OKTA_DOMAIN}/oauth2/default`;
-const OKTA_AUTHORIZE_URL = `${OKTA_ISSUER}/v1/authorize`;
-const OKTA_TOKEN_URL = `${OKTA_ISSUER}/v1/token`;
-const OKTA_USERINFO_URL = `${OKTA_ISSUER}/v1/userinfo`;
+const OKTA_BASE_URL = `https://${OKTA_DOMAIN}`;
+const OKTA_AUTHORIZE_URL = `${OKTA_BASE_URL}/authorize`;
+const OKTA_TOKEN_URL = `${OKTA_BASE_URL}/oauth/token`;
+const OKTA_USERINFO_URL = `${OKTA_BASE_URL}/userinfo`;
 const OKTA_SCOPES = "openid profile email";
 const OKTA_BASIC_AUTH = Buffer.from(`${OKTA_CLIENT_ID}:${OKTA_CLIENT_SECRET}`).toString("base64");
 
