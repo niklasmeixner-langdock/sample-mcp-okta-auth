@@ -320,6 +320,12 @@ async function main() {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
+  // Request logging
+  app.use((req: Request, _res: Response, next: NextFunction) => {
+    console.log(`${req.method} ${req.path}`, req.method === "GET" ? req.query : "");
+    next();
+  });
+
   // CORS
   app.use((req: Request, res: Response, next: NextFunction) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
@@ -347,7 +353,7 @@ async function main() {
     mcpAuthRouter({
       provider,
       issuerUrl: new URL(SERVER_URL),
-      scopesSupported: [OKTA_SCOPES],
+      scopesSupported: OKTA_SCOPES.split(" "),
     })
   );
 
